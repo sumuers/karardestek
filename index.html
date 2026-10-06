@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Öğretim Yaklaşım ve Yöntemleri Karar Destek Sistemi</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --primary-subtle: #eff6ff;
+      --secondary: #0f766e;
+      --secondary-light: #0d9488;
+      --secondary-subtle: #f0fdfa;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --accent: #b45309;
+      --accent-subtle: #fffbeb;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
+      color: white;
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #cbd5e1;
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 0.975rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1.5rem auto 0;
+      max-width: 600px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 0.6rem 1.35rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARD & WIZARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .flow-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .question-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    .question-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .option-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      text-align: left;
+    }
+
+    .option-card:hover {
+      border-color: var(--primary-light);
+      background: var(--primary-subtle);
+      transform: translateY(-2px);
+    }
+
+    .option-card.selected {
+      border-color: var(--primary-light);
+      background: var(--primary-subtle);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+
+    .option-desc {
+      font-size: 0.885rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .option-impact {
+      font-size: 0.775rem;
+      font-weight: 600;
+      color: var(--secondary);
+      background: var(--secondary-subtle);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.35rem;
+      display: inline-block;
+      align-self: flex-start;
+    }
+
+    .wizard-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.925rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .btn-primary {
+      background: var(--primary-light);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* RESULT PRESENTATION */
+    .result-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-hero {
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+      border: 2px solid #99f6e4;
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.6rem;
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .result-hero h2 {
+      font-size: 1.65rem;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-hero p {
+      color: #334155;
+      font-size: 0.975rem;
+      line-height: 1.6;
+    }
+
+    .result-path-trace {
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px dashed #99f6e4;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .path-pill {
+      background: white;
+      border: 1px solid #cbd5e1;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .methods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .method-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
+    .method-card h3 {
+      font-size: 1.15rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .method-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .method-details {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .pedagogical-tips {
+      background: var(--accent-subtle);
+      border-left: 3px solid var(--accent);
+      padding: 0.65rem 0.85rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #854d0e;
+      line-height: 1.45;
+    }
+
+    /* MATRIX TABLE */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .filter-select, .search-input {
+      width: 100%;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: white;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.915rem;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 0.9rem 1.15rem;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 0.9rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    /* TREE VIEW */
+    .tree-box {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .tree-branch {
+      border-left: 2px solid #cbd5e1;
+      margin-left: 1.25rem;
+      padding-left: 1.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .tree-node-title {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      display: inline-block;
+      font-weight: 600;
+      font-size: 0.925rem;
+      margin: 0.4rem 0;
+    }
+
+    .tree-leaf {
+      background: var(--primary-subtle);
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      margin: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+
+    @media print {
+      header, .nav-tabs, .wizard-actions button:not(.btn-print) {
+        display: none !important;
+      }
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card, .result-hero, .method-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Öğretim Yaklaşım & Yöntemleri Karar Destek Sistemi</h1>
+    <p>Sonucu doğrudan etkileyen kriterlerle (öğrenme çevresi, öğretim odağı ve pedagojik dinamik) dersinize en uygun yaklaşım ve yöntem setini hızlıca belirleyin.</p>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('wizard')">🎯 Karar Sihirbazı</button>
+      <button class="tab-btn" onclick="switchTab('matrix')">📋 Karşılaştırma Matrisi</button>
+      <button class="tab-btn" onclick="switchTab('tree')">🌿 Sadeleştirilmiş Karar Ağacı</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: KARAR SİHİRBAZI -->
+    <section id="wizard-tab" class="view-section active">
+      <div class="card" id="wizard-card">
+        <div id="step-badge" class="flow-badge">Adım 1</div>
+        <div id="wizard-content">
+          <!-- Dinamik Karar Sorusu -->
+        </div>
+
+        <div class="wizard-actions">
+          <button class="btn btn-secondary" id="btn-prev" onclick="wizardPrev()" style="visibility: hidden;">← Geri</button>
+          <button class="btn btn-outline" onclick="resetWizard()">🔄 Sıfırla</button>
+          <button class="btn btn-primary" id="btn-next" onclick="wizardNext()" disabled>İleri →</button>
+        </div>
+      </div>
+
+      <!-- Karar Çıktısı Alanı -->
+      <div id="result-view" style="display: none;" class="result-container">
+        <!-- Dinamik Rapor Buraya Gelecek -->
+      </div>
+    </section>
+
+    <!-- TAB 2: KARŞILAŞTIRMA MATRİSİ -->
+    <section id="matrix-tab" class="view-section">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Arama</label>
+          <input type="text" id="matrix-search" class="search-input" placeholder="Yaklaşım veya yöntem ara..." oninput="filterMatrix()">
+        </div>
+        <div class="filter-group">
+          <label>Öğretim Yaklaşımı</label>
+          <select id="matrix-approach-filter" class="filter-select" onchange="filterMatrix()">
+            <option value="">Tümü (8 Yaklaşım)</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Hedeflenen Bilişsel Düzey</label>
+          <select id="matrix-level-filter" class="filter-select" onchange="filterMatrix()">
+            <option value="">Tüm Düzeyler</option>
+            <option value="Temel">Temel (Bilgi / Kavrama)</option>
+            <option value="Uygulama">Uygulama / Beceri</option>
+            <option value="Üst Düzey">Üst Düzey (Analiz / Sentez / Değerlendirme)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="matrix-table">
+          <thead>
+            <tr>
+              <th>Öğretim Yaklaşımı</th>
+              <th>Önerilen Yöntem / Teknik</th>
+              <th>Hedef & Beceri Türü</th>
+              <th>Öğrenme Ortamı</th>
+              <th>Öğretmen & Öğrenci Rolü</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body">
+            <!-- Dinamik doldurulacak -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: AĞAÇ GÖRÜNÜMÜ -->
+    <section id="tree-tab" class="view-section">
+      <div class="tree-box">
+        <h2 style="font-size: 1.35rem; color: var(--primary); margin-bottom: 0.75rem;">Doğrudan Sonuç Üreten Karar Dalları</h2>
+        <p style="color: var(--text-muted); font-size: 0.925rem; margin-bottom: 1.5rem;">Sistemde yalnızca öğretim üyesinin nihai yaklaşım ve yöntem kümesini doğrudan belirleyen ve sonucu değiştiren kararlar yer alır.</p>
+
+        <div>
+          <div class="tree-node-title">🌱 <strong>1. Kriter: Öğrenme Çevresi ve Zaman Kurgusu</strong></div>
+          <div class="tree-branch">
+            <div class="tree-leaf">
+              <strong>➔ Sınıf ve Okul Dışı Ortam (Saha, Doğa, Kurum):</strong> Doğrudan <strong>Sınıf/Okul Dışı Öğrenme</strong> yaklaşımını belirler.<br>
+              <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Gezi, Gözlem, Görüşme (Mülakat).
+            </div>
+            <div class="tree-leaf">
+              <strong>➔ Harmanlanmış / Ters Yüz Kurgu (Teori Evde/Online, Pratik Sınıfta):</strong> Doğrudan <strong>Harmanlanmış / Ters Yüz Öğrenme</strong> yaklaşımını belirler.<br>
+              <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Tartışma Türleri (Çalıştay, Vızıltı Grupları), Örnek Olay, Benzetim.
+            </div>
+            <div class="tree-leaf">
+              <strong>➔ Standart Sınıf veya Laboratuvar Ortamı:</strong> 2. Adıma geçer.
+              
+              <div class="tree-branch">
+                <div class="tree-node-title">🎯 <strong>2. Kriter: Öğretim Odağı & Hedef Düzeyi</strong></div>
+                <div class="tree-branch">
+                  <div class="tree-leaf">
+                    <strong>➔ Öğretmen Merkezli (Temel Bilgi, Kavram ve İlke Aktarımı):</strong> Doğrudan <strong>Sunuş Yoluyla Öğretim</strong> yaklaşımını belirler.<br>
+                    <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Soru-Cevap, Sokratik Sorgulama, Gösteri / Gösterip Yaptırma.
+                  </div>
+                  <div class="tree-leaf">
+                    <strong>➔ Öğrenci Merkezli (Üst Düzey Beceri & Aktif Uygulama):</strong> 3. Adıma geçer.
+                    
+                    <div class="tree-branch">
+                      <div class="tree-node-title">⚡ <strong>3. Kriter: Öğrenmeyi Tetikleyen Temel Dinamik</strong></div>
+                      <div class="tree-branch">
+                        <div class="tree-leaf">
+                          <strong>• Gerçek Yaşam Problemi / Vaka:</strong> <strong>Probleme Dayalı Öğrenme</strong><br>
+                          <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Problem Çözme, Örnek Olay, Beyin Fırtınası.
+                        </div>
+                        <div class="tree-leaf">
+                          <strong>• Somut Ürün, Prototip veya Sergi:</strong> <strong>Proje Tabanlı Öğrenme</strong><br>
+                          <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Model Geliştirme, Performans Görevi.
+                        </div>
+                        <div class="tree-leaf">
+                          <strong>• Bilimsel Araştırma ve Hipotez Testi:</strong> <strong>Araştırma/İncelemeye Dayalı Öğrenme</strong><br>
+                          <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Deney Yapma, Problem Çözme.
+                        </div>
+                        <div class="tree-leaf">
+                          <strong>• Akran Etkileşimi ve Ortak Akıl:</strong> <strong>Grupla / İşbirlikli Öğrenme</strong><br>
+                          <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Tartışma Türleri (Panel, Çalıştay, Münazara, Açık Oturum, Yuvarlak Masa, Vızıltı Grupları, Düşün-İkili Çalış-Paylaş), Altı Şapka, Rol Oynama / Canlandırma, Beyin Fırtınası.
+                        </div>
+                        <div class="tree-leaf">
+                          <strong>• Bireysel Hız ve Bağımsız Çalışma:</strong> <strong>Bireysel Öğrenme</strong><br>
+                          <span style="color:#0f766e; font-weight:600;">Yöntemler:</span> Benzetim (Simülasyon), Performans Görevi.
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // VERİ HAVUZU (TÜM YAKLAŞIM VE YÖNTEMLER)
+    const database = [
+      {
+        id: "outdoors",
+        approach: "Sınıf / Okul Dışı Öğrenme",
+        rationale: "Öğrenme içeriğinin yerinde incelenmesi, doğal ya da kurumsal çevreyle doğrudan temas kurulması hedeflendiği için bu yaklaşım belirlenmiştir.",
+        environment: "Saha, okul bahçesi, müze, arazi, sanayi tesisi, resmi kurumlar",
+        role: "Öğretmen organize edici ve rehber, öğrenci aktif gözlemci ve araştırmacı",
+        methods: [
+          { name: "Gezi", level: "Uygulama", desc: "Müze, fabrika, doğal park veya kurumlara önceden planlanmış, kazanım odaklı yerinde inceleme ziyareti.", tip: "Geziden önce mutlaka odaklı bir gözlem/soru formu dağıtılmalıdır." },
+          { name: "Gözlem", level: "Temel", desc: "Doğal, teknik veya sosyal süreçlerin kendi gerçekliği içinde objektif kriterlerle izlenip kaydedilmesi.", tip: "Gözlem formunun dereceli veya yapılandırılmış olması veri kaybını önler." },
+          { name: "Görüşme (Mülakat)", level: "Uygulama", desc: "Sahadaki uzman, çalışan veya tanık kişilerle önceden belirlenmiş sorularla doğrudan bilgi alışverişi.", tip: "Öğrencilerin önceden soru havuzu oluşturması ve görüşme etiğine uyması sağlanmalıdır." }
+        ]
+      },
+      {
+        id: "blended",
+        approach: "Harmanlanmış Öğrenme / Ters Yüz Öğrenme",
+        rationale: "Ders saatinin teorik anlatımla tüketilmemesi; temel bilginin evde dijital ortamda alınıp sınıf süresinin tartışma ve problem analizine ayrılması amaçlandığı için bu yaklaşım seçilmiştir.",
+        environment: "Ev (Dijital LMS / Video) + Sınıf (Yüz yüze etkileşim ve atölye)",
+        role: "Öğrenci ders öncesinde bağımsız öğrenen, sınıfta uygulayıcı; öğretmen kolaylaştırıcı koç",
+        methods: [
+          { name: "Tartışma Türleri (Çalıştay, Vızıltı Grupları, Düşün-İkili Çalış-Paylaş)", level: "Üst Düzey", desc: "Evde edinilen teorik bilginin sınıfta küçük gruplarla hızla analizi ve sentezlenmesi.", tip: "Sınıf süresini asla tekrar anlatımla geçirmeyin; doğrudan vaka ve tartışma açın." },
+          { name: "Örnek Olay", level: "Üst Düzey", desc: "Öğrencilerin ön hazırlıkla geldikleri teoriyi sınıfta somut bir vaka metni üzerinde test etmeleri.", tip: "Vakanın tartışmalı ve birden fazla karar seçeneği sunan nitelikte olması verimi artırır." },
+          { name: "Benzetim (Simülasyon)", level: "Uygulama", desc: "Yüz yüze derste yazılım veya modellerle senaryoların test edilmesi.", tip: "Simülasyon çıktılarının sınıfça değerlendirilmesi kavram yanılgılarını önler." }
+        ]
+      },
+      {
+        id: "direct",
+        approach: "Sunuş Yoluyla Öğretim",
+        rationale: "Kısa sürede yoğun kavramsal ve ilkesel bilginin yapılandırılmış biçimde aktarılması, ön bilgilerin tamamlanması ve kavram yanılgılarının giderilmesi hedeflendiği için bu yaklaşım uygundur.",
+        environment: "Geleneksel amfi, sınıf veya sunum düzeni",
+        role: "Öğretmen aktif yapılandırıcı ve aktarıcı, öğrenci alıcı ve dönüt sağlayıcı",
+        methods: [
+          { name: "Soru-Cevap", level: "Temel", desc: "Öğrencilerin dikkatini toplamak, anlama düzeyini anlık ölçmek ve etkileşimi diri tutmak için uygulanır.", tip: "Sadece hatırlama düzeyinde kalmayın; 'Nasıl gerekçelendirirsiniz?' soruları ekleyin." },
+          { name: "Sokratik Sorgulama", level: "Üst Düzey", desc: "Öğrencinin doğru bildiği çelişkileri adım adım sorgulatarak kavramı kendi zihninde doğurmasını sağlama.", tip: "Kavram yanılgılarını ve ezberleri kırmada en etkili yöntemdir." },
+          { name: "Gösteri / Gösterip Yaptırma", level: "Uygulama", desc: "Fiziksel performans gerektiren (psikomotor) veya teknik bir becerinin önce hoca tarafından adım adım gösterilmesi, ardından öğrenciye yaptırılması.", tip: "Tüm adımların açıkça görülebilir ve güvenli olduğundan emin olunmalıdır." }
+        ]
+      },
+      {
+        id: "pbl",
+        approach: "Probleme Dayalı Öğrenme",
+        rationale: "Öğrenme sürecinin gerçek dünyadan alınmış, karmaşık ve tek bir çözümü olmayan bir problem senaryosu etrafında yapılandırılması amaçlandığı için bu yaklaşım seçilmiştir.",
+        environment: "Esnek oturma düzenli sınıf veya araştırma ortamı",
+        role: "Öğrenci problem çözücü ve stratejist, öğretmen rehber",
+        methods: [
+          { name: "Problem Çözme", level: "Üst Düzey", desc: "Bilimsel basamakları (sorunu tanımlama, veri toplama, hipotez kurma, çözüm üretme) izleme.", tip: "Problemin iyi yapılandırılmamış (birden fazla olası çözümü olan) olması şarttır." },
+          { name: "Örnek Olay", level: "Üst Düzey", desc: "Yaşanmış veya kurgusal bir olay metni üzerinden kriz analizi ve karar alma.", tip: "Öğrencilerin farklı bakış açılarını savunmalarını teşvik edin." },
+          { name: "Beyin Fırtınası", level: "Üst Düzey", desc: "Problem durumuna ilişkin eleştiri süzgeci olmaksızın hızlı ve çok sayıda yaratıcı fikir üretme.", tip: "Süreçte hiçbir fikrin anında reddedilmesine veya alaya alınmasına izin verilmez." }
+        ]
+      },
+      {
+        id: "project",
+        approach: "Proje Tabanlı Öğrenme",
+        rationale: "Geniş bir zaman diliminde, disiplinlerarası bağlantılar kurularak somut bir ürün, prototip veya kamusal bir sergi ortaya konması hedeflendiği için bu yaklaşım uygundur.",
+        environment: "Atölye, laboratuvar, tasarım stüdyosu veya derslik",
+        role: "Öğrenci tasarımcı ve üretici, öğretmen proje danışmanı",
+        methods: [
+          { name: "Model Geliştirme", level: "Uygulama", desc: "Teorik veya teknik bir sistemin fiziksel, dijital veya kavramsal prototipinin/maketinin üretilmesi.", tip: "Modelin sadece estetik değil, belirlenen işlevsel kriterleri karşılaması değerlendirilir." },
+          { name: "Performans Görevi (Proje, Sergi, Klinik Çalışmaları, Materyal Hazırlama, Sosyal Sorumluluk)", level: "Üst Düzey", desc: "Gerçek yaşamla bağlantılı, hedef kitleye sunulabilir nitelikte özgün bir ürün ve rapor tamamlama.", tip: "Değerlendirme kriterleri (Rubrik) çalışmanın en başında öğrencilerle paylaşılmalıdır." }
+        ]
+      },
+      {
+        id: "inquiry",
+        approach: "Araştırma / İncelemeye Dayalı Öğrenme",
+        rationale: "Öğrencilerin bilim insanı gibi hareket ederek hipotezler kurması, deney yapması ve veriye dayalı kanıtlarla bilgiye ulaşması hedeflendiği için bu yaklaşım tercih edilmiştir.",
+        environment: "Fen/Sosyal laboratuvarları, veri analiz merkezleri, kütüphaneler",
+        role: "Öğrenci araştırmacı bilim insanı, öğretmen bilimsel yöntem koçu",
+        methods: [
+          { name: "Deney Yapma", level: "Uygulama", desc: "Değişkenleri kontrol ederek kontrollü deney ortamında neden-sonuç bağıntılarını test etme.", tip: "Öğrencilere sadece 'yemek tarifi' gibi yönerge uygulatmayın; değişkenleri kendilerinin belirlemesini sağlayın." },
+          { name: "Problem Çözme", level: "Üst Düzey", desc: "Bilimsel araştırma metodolojisiyle veri derleme, test etme ve raporlama.", tip: "Veri güvenilirliği ve araştırma etiği ilkeleri mutlaka vurgulanmalıdır." }
+        ]
+      },
+      {
+        id: "coop",
+        approach: "Grupla / İşbirlikli Öğrenme",
+        rationale: "Öğrencilerin ortak hedefe ulaşmak için sosyal sorumluluk alması, akran etkileşimi, empati ve çok yönlü tartışma yoluyla öğrenmesi istendiği için bu yaklaşım belirlenmiştir.",
+        environment: "Grup masaları düzeninde etkileşimli sınıf ortamı",
+        role: "Öğrenciler takım arkadaşı ve ortak sorumlu, öğretmen kolaylaştırıcı moderatör",
+        methods: [
+          { name: "Tartışma Türleri (Panel, Çalıştay, Münazara, Açık Oturum, Yuvarlak Masa, Vızıltı Grupları, Düşün-İkili Çalış-Paylaş)", level: "Üst Düzey", desc: "Fikirlerin savunulduğu, tez-antitez üretildiği ve ortak uzlaşıya varıldığı yapılandırılmış oturumlar.", tip: "Gruplar oluşturulurken akademik ve sosyal açıdan heterojen dağılım sağlanmalıdır." },
+          { name: "Altı Şapka", level: "Üst Düzey", desc: "Bir konunun duygusal, iyimser, eleştirel, yaratıcı, bilgi odaklı ve yönetimsel açılardan sistematik analizi.", tip: "Tüm sınıfın aynı anda aynı şapka rengini takması düşünce karmaşasını önler." },
+          { name: "Rol Oynama / Canlandırma", level: "Uygulama", desc: "Kişilerarası ilişkileri, mesleki senaryoları veya etik ikilemleri empati kurarak sahneleme.", tip: "Canlandırma sonrasında mutlaka sınıfça 'rol dışı' duygu ve karar analizi yapılmalıdır." },
+          { name: "Beyin Fırtınası", level: "Üst Düzey", desc: "Grupça en kısa sürede yargılama olmaksızın özgün fikirler kümesi oluşturma.", tip: "Önce miktar hedeflenmeli, eleme ve gruplandırma ikinci aşamaya bırakılmalıdır." }
+        ]
+      },
+      {
+        id: "individual",
+        approach: "Bireysel Öğrenme",
+        rationale: "Öğrencinin kendi öğrenme hızında, bireysel sorumluluk alarak ve özerk çalışma stratejileriyle ilerlemesi hedeflendiği için bu yaklaşım seçilmiştir.",
+        environment: "Bireysel çalışma istasyonları, kişisel bilgisayar ortamı veya atölye",
+        role: "Öğrenci tam özerk yönetici, öğretmen bireysel geri bildirim danışmanı",
+        methods: [
+          { name: "Benzetim (Simülasyon)", level: "Uygulama", desc: "Maliyetli, tehlikeli ya da tekrarı zor senaryoların dijital veya model ortamında bireysel olarak denenmesi.", tip: "Öğrenciye sınırsız deneme-yanılma ve anında geri bildirim alma özgürlüğü tanır." },
+          { name: "Performans Görevi", level: "Üst Düzey", desc: "Öğrencinin kendi ilgi alanı ve temposu doğrultusunda bireysel rapor veya portfolyo hazırlaması.", tip: "Zaman yönetimi ve ara teslim takvimleri net belirlenmelidir." }
+        ]
+      }
+    ];
+
+    // KARAR SİHİRBAZI MANTIĞI: YALNIZCA SONUCU DEĞİŞTİREN ADIMLAR
+    let wizardPath = {
+      step: 1,
+      env: null,      // "outside" | "blended" | "classroom"
+      focus: null,    // "teacher" | "student"
+      dynamic: null   // "pbl" | "project" | "inquiry" | "coop" | "individual"
+    };
+
+    function renderCurrentStep() {
+      const container = document.getElementById("wizard-content");
+      const badge = document.getElementById("step-badge");
+      const nextBtn = document.getElementById("btn-next");
+      const prevBtn = document.getElementById("btn-prev");
+
+      prevBtn.style.visibility = wizardPath.step > 1 ? "visible" : "hidden";
+
+      if (wizardPath.step === 1) {
+        badge.innerText = "1. Karar: Öğrenme Çevresi & Zaman Kurgusu";
+        nextBtn.innerText = (wizardPath.env === "outside" || wizardPath.env === "blended") ? "Sonucu Gör 🚀" : "İleri →";
+        nextBtn.disabled = !wizardPath.env;
+
+        container.innerHTML = `
+          <div class="question-title">Dersinizin fiziksel ve zamansal ortamı neresidir?</div>
+          <div class="question-desc">Bu seçim doğrudan yaklaşım ailesini belirler. Sınıf dışı veya karma kurgular başka adıma gerek kalmadan yaklaşımı netleştirir.</div>
+          <div class="options-grid">
+            <div class="option-card ${wizardPath.env === 'outside' ? 'selected' : ''}" onclick="selectEnv('outside')">
+              <div class="option-header">
+                <span>🏞️ Sınıf ve Okul Dışı Ortam</span>
+                <span>${wizardPath.env === 'outside' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Doğal çevre, müze, fabrika, kurum veya arazi ziyareti. Ders mekânı doğrudan sahadır.</div>
+              <span class="option-impact">⚡ Doğrudan Sonuç: Sınıf/Okul Dışı Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.env === 'blended' ? 'selected' : ''}" onclick="selectEnv('blended')">
+              <div class="option-header">
+                <span>🔄 Harmanlanmış / Ters Yüz Ortam</span>
+                <span>${wizardPath.env === 'blended' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Teorik bilgi ve ön hazırlık dijital ortamda/evde; derinlemesine uygulama, tartışma ve vaka analizi yüz yüze sınıfta.</div>
+              <span class="option-impact">⚡ Doğrudan Sonuç: Harmanlanmış / Ters Yüz Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.env === 'classroom' ? 'selected' : ''}" onclick="selectEnv('classroom')">
+              <div class="option-header">
+                <span>🏫 Standart Sınıf veya Laboratuvar</span>
+                <span>${wizardPath.env === 'classroom' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Dersin bütünü yerleşik derslik, amfi, atölye veya laboratuvar içinde yüz yüze yürütülecektir.</div>
+              <span class="option-impact">➔ Devam: Öğretim Odağını Seçin (Adım 2)</span>
+            </div>
+          </div>
+        `;
+      } 
+      else if (wizardPath.step === 2) {
+        badge.innerText = "2. Karar: Öğretim Odağı & Hedeflenen Bilişsel Düzey";
+        nextBtn.innerText = (wizardPath.focus === "teacher") ? "Sonucu Gör 🚀" : "İleri →";
+        nextBtn.disabled = !wizardPath.focus;
+
+        container.innerHTML = `
+          <div class="question-title">Öğretim sürecinin odağında kim yer alıyor ve temel hedef nedir?</div>
+          <div class="question-desc">Kısa sürede bilgi/kavram aktarımı doğrudan Sunuş Yolu yaklaşımını belirler; öğrenci merkezli üst düzey beceriler dinamik ayrımına yönlendirir.</div>
+          <div class="options-grid">
+            <div class="option-card ${wizardPath.focus === 'teacher' ? 'selected' : ''}" onclick="selectFocus('teacher')">
+              <div class="option-header">
+                <span>👨‍🏫 Öğretmen Merkezli / Bilgi & İlke Aktarımı</span>
+                <span>${wizardPath.focus === 'teacher' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Kavramların yapılandırılması, temel ilkelerin açıklanması, ön bilgilerin tamamlanması ve kavram yanılgılarının giderilmesi esastır.</div>
+              <span class="option-impact">⚡ Doğrudan Sonuç: Sunuş Yoluyla Öğretim</span>
+            </div>
+
+            <div class="option-card ${wizardPath.focus === 'student' ? 'selected' : ''}" onclick="selectFocus('student')">
+              <div class="option-header">
+                <span>🎯 Öğrenci Merkezli / Üst Düzey Beceriler</span>
+                <span>${wizardPath.focus === 'student' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Öğrencinin bizzat sorguladığı, ürettiği, akranlarıyla tartıştığı veya bir problemi çözdüğü aktif öğrenme süreci.</div>
+              <span class="option-impact">➔ Devam: Pedagojik Dinamiği Seçin (Adım 3)</span>
+            </div>
+          </div>
+        `;
+      } 
+      else if (wizardPath.step === 3) {
+        badge.innerText = "3. Karar: Öğrenmeyi Tetikleyen Temel Pedagojik Dinamik";
+        nextBtn.innerText = "Sonucu Gör 🚀";
+        nextBtn.disabled = !wizardPath.dynamic;
+
+        container.innerHTML = `
+          <div class="question-title">Öğrencinin eylemini ve motivasyonunu başlatan temel itici güç nedir?</div>
+          <div class="question-desc">Bu son karar, öğrenci merkezli 5 temel yaklaşım arasından dersinize en uygun olanı ve buna bağlı yöntem setini kesinleştirir.</div>
+          <div class="options-grid">
+            <div class="option-card ${wizardPath.dynamic === 'pbl' ? 'selected' : ''}" onclick="selectDynamic('pbl')">
+              <div class="option-header">
+                <span>🧩 Gerçek Yaşam Problemi / Vaka</span>
+                <span>${wizardPath.dynamic === 'pbl' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Otantik, karmaşık ve açık uçlu bir problem veya senaryo üzerinden çözüm geliştirme.</div>
+              <span class="option-impact">⚡ Sonuç: Probleme Dayalı Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.dynamic === 'project' ? 'selected' : ''}" onclick="selectDynamic('project')">
+              <div class="option-header">
+                <span>🛠️ Somut Ürün, Prototip veya Sergi</span>
+                <span>${wizardPath.dynamic === 'project' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Geniş zamana yayılan, disiplinlerarası ve somut bir çıktı/model/maket üretme süreci.</div>
+              <span class="option-impact">⚡ Sonuç: Proje Tabanlı Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.dynamic === 'inquiry' ? 'selected' : ''}" onclick="selectDynamic('inquiry')">
+              <div class="option-header">
+                <span>🔬 Bilimsel Araştırma ve Hipotez Testi</span>
+                <span>${wizardPath.dynamic === 'inquiry' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Deney yapma, değişken kontrolü, veri toplama ve hipotezleri laboratuvar ortamında sınama.</div>
+              <span class="option-impact">⚡ Sonuç: Araştırma/İncelemeye Dayalı Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.dynamic === 'coop' ? 'selected' : ''}" onclick="selectDynamic('coop')">
+              <div class="option-header">
+                <span>👥 Akran Etkileşimi ve Ortak Akıl</span>
+                <span>${wizardPath.dynamic === 'coop' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Birlikte tartışma, empati kurma, çok açılı analiz (Altı Şapka) ve ortak ürün sorumluluğu.</div>
+              <span class="option-impact">⚡ Sonuç: Grupla / İşbirlikli Öğrenme</span>
+            </div>
+
+            <div class="option-card ${wizardPath.dynamic === 'individual' ? 'selected' : ''}" onclick="selectDynamic('individual')">
+              <div class="option-header">
+                <span>👤 Bireysel Hız ve Bağımsız Çalışma</span>
+                <span>${wizardPath.dynamic === 'individual' ? '✓' : '○'}</span>
+              </div>
+              <div class="option-desc">Öğrencinin kendi temposunda simülasyon deneyimlemesi veya bireysel performans görevi tamamlaması.</div>
+              <span class="option-impact">⚡ Sonuç: Bireysel Öğrenme</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function selectEnv(val) {
+      wizardPath.env = val;
+      renderCurrentStep();
+    }
+
+    function selectFocus(val) {
+      wizardPath.focus = val;
+      renderCurrentStep();
+    }
+
+    function selectDynamic(val) {
+      wizardPath.dynamic = val;
+      renderCurrentStep();
+    }
+
+    function wizardNext() {
+      // 1. adımdaysa:
+      if (wizardPath.step === 1) {
+        if (wizardPath.env === "outside" || wizardPath.env === "blended") {
+          showResult();
+          return;
+        } else {
+          wizardPath.step = 2;
+          renderCurrentStep();
+          return;
+        }
+      }
+
+      // 2. adımdaysa:
+      if (wizardPath.step === 2) {
+        if (wizardPath.focus === "teacher") {
+          showResult();
+          return;
+        } else {
+          wizardPath.step = 3;
+          renderCurrentStep();
+          return;
+        }
+      }
+
+      // 3. adımdaysa:
+      if (wizardPath.step === 3) {
+        showResult();
+      }
+    }
+
+    function wizardPrev() {
+      if (wizardPath.step > 1) {
+        wizardPath.step--;
+        renderCurrentStep();
+      }
+    }
+
+    function resetWizard() {
+      wizardPath = { step: 1, env: null, focus: null, dynamic: null };
+      document.getElementById("wizard-card").style.display = "block";
+      document.getElementById("result-view").style.display = "none";
+      renderCurrentStep();
+    }
+
+    function showResult() {
+      document.getElementById("wizard-card").style.display = "none";
+      const resultContainer = document.getElementById("result-view");
+      resultContainer.style.display = "flex";
+
+      let targetId = "";
+      let pathPills = [];
+
+      if (wizardPath.env === "outside") {
+        targetId = "outdoors";
+        pathPills = ["Öğrenme Çevresi: Sınıf/Okul Dışı Ortam"];
+      } else if (wizardPath.env === "blended") {
+        targetId = "blended";
+        pathPills = ["Öğrenme Çevresi: Harmanlanmış / Ters Yüz"];
+      } else if (wizardPath.focus === "teacher") {
+        targetId = "direct";
+        pathPills = ["Ortam: Sınıf İçi", "Odak: Öğretmen Merkezli / Bilgi Aktarımı"];
+      } else {
+        targetId = wizardPath.dynamic;
+        let dynName = "";
+        if (targetId === "pbl") dynName = "Gerçek Yaşam Problemi / Vaka";
+        if (targetId === "project") dynName = "Somut Ürün / Prototip / Sergi";
+        if (targetId === "inquiry") dynName = "Bilimsel Araştırma & Hipotez";
+        if (targetId === "coop") dynName = "Akran Etkileşimi & Ortak Akıl";
+        if (targetId === "individual") dynName = "Bireysel Hız & Bağımsız Çalışma";
+        pathPills = ["Ortam: Sınıf İçi", "Odak: Öğrenci Merkezli", "Temel Dinamik: " + dynName];
+      }
+
+      const match = database.find(d => d.id === targetId);
+
+      let methodsCardsHtml = "";
+      match.methods.forEach(m => {
+        methodsCardsHtml += `
+          <div class="method-card">
+            <div>
+              <h3>
+                <span>${m.name}</span>
+                <span class="method-tag">${m.level} Düzey</span>
+              </h3>
+              <p class="method-details" style="margin-top:0.5rem;">${m.desc}</p>
+            </div>
+            <div class="pedagogical-tips">
+              💡 <strong>Pedagojik İpucu:</strong> ${m.tip}
+            </div>
+          </div>
+        `;
+      });
+
+      resultContainer.innerHTML = `
+        <div class="result-hero">
+          <span class="result-badge">Doğrudan Eşleşen Öğretim Yaklaşımı</span>
+          <h2>${match.approach}</h2>
+          <p>${match.rationale}</p>
+          <div class="result-path-trace">
+            <span>Karar Adımları:</span>
+            ${pathPills.map(p => `<span class="path-pill">${p}</span>`).join(" ➔ ")}
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h3 style="font-size:1.3rem; color:var(--text);">Önerilen Yöntem ve Teknik Havuzu</h3>
+              <p style="font-size:0.875rem; color:var(--text-muted);">Bu yaklaşım altında ders kazanımınıza uygun olarak doğrudan kullanabileceğiniz yöntemler:</p>
+            </div>
+            <button class="btn btn-outline" onclick="window.print()">🖨️ Karar Raporunu Yazdır / PDF</button>
+          </div>
+
+          <div class="methods-grid">
+            ${methodsCardsHtml}
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:center; margin-top:1rem;">
+          <button class="btn btn-primary" onclick="resetWizard()">← Yeni Bir Ders / Durum İçin Karar Ver</button>
+        </div>
+      `;
+    }
+
+    // TABLAR ARASI GEÇİŞ
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".view-section").forEach(s => s.classList.remove("active"));
+
+      if (tabName === "wizard") {
+        document.querySelector(".tab-btn:nth-child(1)").classList.add("active");
+        document.getElementById("wizard-tab").classList.add("active");
+      } else if (tabName === "matrix") {
+        document.querySelector(".tab-btn:nth-child(2)").classList.add("active");
+        document.getElementById("matrix-tab").classList.add("active");
+        populateMatrix();
+      } else if (tabName === "tree") {
+        document.querySelector(".tab-btn:nth-child(3)").classList.add("active");
+        document.getElementById("tree-tab").classList.add("active");
+      }
+    }
+
+    // MATRİS VE FİLTRELEME
+    function populateMatrix() {
+      const approachSelect = document.getElementById("matrix-approach-filter");
+      if (approachSelect.options.length <= 1) {
+        database.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.approach;
+          opt.textContent = item.approach;
+          approachSelect.appendChild(opt);
+        });
+      }
+      filterMatrix();
+    }
+
+    function filterMatrix() {
+      const searchVal = document.getElementById("matrix-search").value.toLowerCase();
+      const approachVal = document.getElementById("matrix-approach-filter").value;
+      const levelVal = document.getElementById("matrix-level-filter").value;
+      const tbody = document.getElementById("matrix-body");
+
+      let rowsHtml = "";
+
+      database.forEach(item => {
+        if (approachVal && item.approach !== approachVal) return;
+
+        item.methods.forEach(m => {
+          if (levelVal && m.level !== levelVal) return;
+          
+          const matchSearch = item.approach.toLowerCase().includes(searchVal) ||
+                              m.name.toLowerCase().includes(searchVal) ||
+                              m.desc.toLowerCase().includes(searchVal);
+          if (!matchSearch) return;
+
+          rowsHtml += `
+            <tr>
+              <td><strong>${item.approach}</strong></td>
+              <td><span style="color:var(--primary); font-weight:600;">${m.name}</span></td>
+              <td><span class="method-tag">${m.level}</span></td>
+              <td>${item.environment}</td>
+              <td style="color:var(--text-muted); font-size:0.875rem;">${item.role}</td>
+            </tr>
+          `;
+        });
+      });
+
+      if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">Arama kriterine uygun sonuç bulunamadı.</td></tr>`;
+      }
+
+      tbody.innerHTML = rowsHtml;
+    }
+
+    // BAŞLATMA
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCurrentStep();
+    });
+  </script>
+</body>
+</html>
